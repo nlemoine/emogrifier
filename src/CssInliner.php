@@ -186,8 +186,15 @@ class CssInliner extends AbstractHtmlProcessor
         $cssSelectorConverter = $this->getCssSelectorConverter();
         foreach ($cssRules['inlinable'] as $cssRule) {
             try {
+                $selector = $cssRule['selector'];
+                $xpathSelector = $cssSelectorConverter->toXPath($selector);
+                if (\strpos($selector, '\\') !== false) {
+                    $selectorUnescaped = \str_replace('\\', '', \substr($selector, 1));
+                    $xpathSelector = \str_replace(\substr($selector, 1), $selectorUnescaped, $xpathSelector);
+                }
+
                 $nodesMatchingCssSelectors = $this->getXPath()
-                    ->query($cssSelectorConverter->toXPath($cssRule['selector']));
+                    ->query($xpathSelector);
 
                 /** @var \DOMElement $node */
                 foreach ($nodesMatchingCssSelectors as $node) {
